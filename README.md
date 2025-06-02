@@ -62,5 +62,6 @@ Görselleştirme `generate_leaflet_html()` fonksiyonuyla `map_template.html` iç
 ---
 
 ## 📁 Proje Raporu
+📄 [Proje Raporunu Görüntüle](./grup17.pdf)
 
 
