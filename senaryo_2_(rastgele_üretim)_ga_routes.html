@@ -1,0 +1,239 @@
+<!-- map_template.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Drone Rotaları</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    integrity=""
+    crossorigin=""
+  />
+  <style>
+    /* Haritanın tüm ekrana (viewport) yayılması için: */
+    html, body, #map {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Legend için stil (küçük bir kutu altta sol köşede gözükecek) */
+    .legend {
+      background: white;
+      padding: 10px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.4em;
+      max-width: 180px;
+    }
+    .legend-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .legend-marker {
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+      border: 1px solid #999;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity=""
+    crossorigin=""
+  ></script>
+
+  <script>
+    // ======================
+    // Python tarafından gönderilecek veri nesnesi:
+    // ======================
+    // Buraya ChatGPT-Ürettiğiniz main.py içinden aşağıdaki JSON yapısı gelecek:
+    //
+    // var data = {
+    //   drone_segments:  [ 
+    //     [ [lng,lat], [lng,lat] , … ],   // Drone 1’in segment listesi
+    //     [ [lng,lat], [lng,lat] , … ],   // Drone 2’nin segment listesi
+    //     … 
+    //   ],
+    //   drone_colors:    [ "#e6194B", "#3cb44b", "#4363d8", "#f58231", … ], // Drone sayısı kadar renk
+    //   start_points:    [ [lat,lng], [lat,lng], … ],  // Drone’ların başlangıç noktaları
+    //   delivery_points: [ [lat,lng], [lat,lng], … ],  // Teslimat noktaları
+    //   no_fly_polygons: [ [ [lat,lng], [lat,lng], … ], … ] // No-fly zonelarının köşe dizisi
+    // };
+    var data = {"drone_segments": [[[[93, 62], [79, 46]], [[79, 46], [23, 35]], [[23, 35], [21, 48]], [[87, 68], [84, 91]], [[84, 74], [90, 80]], [[90, 80], [31, 74]], [[20, 47], [4, 40]], [[4, 40], [21, 33]], [[21, 33], [18, 33]], [[18, 33], [91, 40]], [[91, 40], [56, 70]], [[56, 70], [73, 60]], [[73, 60], [33, 95]], [[33, 95], [64, 97]], [[64, 97], [46, 28]], [[76, 8], [81, 64]], [[81, 64], [77, 81]], [[77, 81], [27, 69]], [[1, 11], [14, 37]], [[14, 37], [12, 48]], [[30, 7], [57, 15]], [[57, 15], [98, 16]], [[98, 16], [69, 99]], [[69, 99], [76, 8]], [[76, 8], [69, 96]], [[69, 96], [51, 85]], [[84, 29], [59, 48]], [[59, 48], [75, 70]]], [[[69, 11], [91, 40]], [[91, 40], [76, 8]], [[76, 8], [57, 15]], [[7, 6], [30, 7]], [[84, 74], [77, 81]], [[79, 46], [64, 97]], [[64, 97], [98, 16]], [[98, 16], [93, 62]], [[31, 74], [18, 33]], [[7, 51], [46, 28]], [[81, 64], [87, 41]], [[69, 96], [59, 48]], [[59, 48], [84, 29]], [[84, 29], [56, 70]], [[56, 70], [69, 99]], [[90, 80], [73, 60]], [[33, 95], [87, 68]], [[87, 68], [51, 85]]], [[[33, 95], [21, 48]], [[73, 60], [87, 41]], [[87, 41], [79, 46]], [[76, 8], [64, 97]], [[30, 7], [77, 81]], [[77, 81], [84, 29]], [[84, 29], [81, 64]], [[57, 15], [76, 8]], [[23, 35], [31, 24]], [[56, 70], [98, 16]], [[46, 28], [21, 33]], [[27, 69], [31, 74]], [[31, 74], [69, 96]], [[69, 96], [69, 99]], [[69, 99], [4, 40]]], [[[91, 83], [84, 91]], [[84, 29], [51, 85]], [[51, 85], [81, 64]], [[81, 64], [91, 40]], [[91, 40], [76, 8]], [[14, 37], [21, 33]], [[90, 80], [73, 60]], [[31, 74], [64, 97]], [[31, 24], [77, 81]], [[1, 11], [27, 69]], [[27, 69], [33, 95]], [[59, 48], [98, 16]], [[56, 70], [42, 9]], [[42, 9], [23, 35]], [[23, 35], [12, 48]], [[79, 46], [87, 68]], [[87, 68], [69, 96]], [[69, 96], [4, 40]]], [[[56, 70], [46, 28]], [[46, 28], [42, 9]], [[51, 85], [81, 64]], [[81, 64], [73, 60]], [[73, 60], [31, 24]], [[93, 62], [77, 81]], [[77, 81], [84, 91]], [[84, 91], [84, 74]], [[84, 74], [76, 8]], [[76, 8], [76, 8]], [[76, 8], [87, 68]], [[87, 68], [98, 16]], [[31, 74], [20, 47]], [[20, 47], [23, 35]], [[23, 35], [7, 51]], [[64, 97], [75, 70]], [[75, 70], [79, 46]], [[79, 46], [91, 40]], [[30, 7], [7, 6]], [[21, 33], [4, 40]], [[59, 48], [87, 41]], [[90, 80], [69, 99]], [[69, 99], [84, 29]], [[69, 96], [33, 95]], [[33, 95], [14, 37]], [[1, 11], [21, 48]]], [[[20, 89], [69, 96]], [[69, 96], [84, 29]], [[84, 29], [98, 16]], [[98, 16], [93, 62]], [[23, 35], [21, 33]], [[21, 33], [46, 28]], [[46, 28], [56, 70]], [[1, 11], [27, 69]], [[27, 69], [14, 37]], [[31, 74], [77, 81]], [[77, 81], [31, 24]], [[31, 24], [30, 7]], [[91, 40], [84, 74]], [[84, 74], [81, 64]], [[81, 64], [59, 48]], [[21, 48], [7, 51]], [[7, 51], [18, 33]], [[18, 33], [87, 41]], [[87, 41], [76, 8]], [[76, 8], [87, 68]], [[87, 68], [75, 70]], [[76, 8], [69, 99]], [[69, 99], [79, 46]], [[79, 46], [33, 95]], [[33, 95], [84, 91]], [[51, 85], [64, 97]], [[64, 97], [12, 48]], [[12, 48], [20, 47]], [[20, 47], [42, 9]], [[7, 6], [4, 40]]], [[[75, 70], [76, 8]], [[90, 80], [84, 29]], [[84, 29], [73, 60]], [[73, 60], [69, 96]], [[14, 37], [23, 35]], [[23, 35], [27, 69]], [[18, 33], [33, 95]], [[33, 95], [21, 48]], [[91, 40], [59, 48]], [[81, 64], [76, 8]], [[76, 8], [84, 91]], [[12, 48], [46, 28]], [[87, 68], [51, 85]], [[93, 62], [64, 97]], [[64, 97], [98, 16]]], [[[31, 24], [75, 70]], [[12, 48], [1, 11]], [[76, 8], [90, 80]], [[79, 46], [91, 40]], [[91, 40], [87, 68]], [[51, 85], [84, 74]], [[57, 15], [76, 8]], [[76, 8], [73, 60]], [[73, 60], [64, 97]], [[84, 91], [33, 95]], [[33, 95], [77, 81]], [[77, 81], [93, 62]], [[21, 33], [14, 37]], [[87, 41], [69, 99]]], [[[64, 97], [84, 91]], [[84, 91], [76, 8]], [[90, 80], [51, 85]], [[21, 33], [87, 41]], [[87, 41], [79, 46]], [[77, 81], [93, 62]], [[93, 62], [69, 96]], [[1, 11], [20, 7]], [[56, 70], [75, 70]], [[42, 9], [23, 35]], [[33, 95], [69, 99]], [[21, 48], [31, 24]], [[84, 29], [81, 64]], [[18, 33], [91, 40]]], [[[37, 80], [84, 91]], [[84, 91], [81, 64]], [[81, 64], [75, 70]], [[7, 6], [42, 9]], [[42, 9], [31, 24]], [[31, 24], [7, 51]], [[7, 51], [46, 28]], [[27, 69], [21, 48]], [[20, 7], [1, 11]], [[1, 11], [4, 40]], [[4, 40], [18, 33]], [[18, 33], [20, 47]], [[20, 47], [31, 74]], [[69, 96], [87, 41]], [[87, 41], [33, 95]], [[33, 95], [90, 80]], [[90, 80], [56, 70]], [[56, 70], [87, 68]], [[14, 37], [12, 48]], [[12, 48], [69, 99]], [[69, 99], [84, 29]], [[84, 29], [51, 85]], [[51, 85], [64, 97]], [[64, 97], [84, 74]], [[79, 46], [59, 48]], [[57, 15], [76, 8]], [[76, 8], [73, 60]], [[73, 60], [77, 81]], [[77, 81], [76, 8]]]], "drone_colors": ["#e6194B", "#3cb44b", "#4363d8", "#f58231", "#911eb4", "#42d4f4", "#f032e6", "#bfef45", "#fabed4", "#469990"], "start_points": [[28, 31], [11, 69], [29, 27], [83, 91], [35, 75], [89, 20], [43, 97], [77, 44], [15, 68], [80, 37]], "delivery_points": [[46, 79], [29, 84], [48, 12], [47, 20], [81, 77], [48, 59], [41, 87], [40, 4], [40, 91], [33, 18], [95, 33], [28, 46], [19, 14], [8, 76], [32, 67], [68, 87], [37, 14], [97, 64], [64, 81], [99, 69], [62, 41], [7, 30], [62, 93], [16, 98], [33, 21], [96, 69], [85, 51], [15, 57], [70, 75], [80, 90], [9, 42], [69, 27], [60, 73], [12, 24], [59, 52], [51, 7], [24, 31], [35, 23], [70, 56], [11, 1], [62, 52], [48, 21], [54, 36], [91, 84], [74, 7], [6, 7], [7, 20], [8, 76], [74, 31], [74, 84]], "no_fly_polygons": [[[40, 26], [40, 39], [54, 39], [54, 26]], [[16, 50], [16, 70], [36, 70], [36, 50]], [[58, 38], [58, 53], [69, 53], [69, 38]], [[58, 1], [58, 20], [77, 20], [77, 1]], [[9, 12], [9, 30], [22, 30], [22, 12]]]};
+
+
+    // 1) Leaflet haritasını oluştur
+
+    var map = L.map('map').setView([0, 0], 2);
+
+
+    // 2) OpenStreetMap tile katmanını ekle
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+
+    // 3) No-Fly Bölgeleri: pembe poligon (fillOpacity=0.4)
+
+    data.no_fly_polygons.forEach(function(polyCoords) {
+      // polyCoords: [ [lat,lng], [lat,lng], … ]
+      L.polygon(polyCoords, {
+        color: '#FF69B4',      // kenar rengi
+        fillColor: '#FF69B4',  // dolgu rengi
+        fillOpacity: 0.4,
+        weight: 2
+      }).addTo(map);
+    });
+
+
+    // 4) Teslimat Noktaları: siyah circleMarker
+
+    data.delivery_points.forEach(function(pt) {
+      // pt = [lat, lng]
+      L.circleMarker(pt, {
+        radius: 6,
+        color: '#000000',
+        fillColor: '#000000',
+        fillOpacity: 1
+      }).addTo(map);
+    });
+
+
+    // 5) Drone Başlangıç Noktaları: renkli yıldız (★)
+
+    data.start_points.forEach(function(pt, idx) {
+      // pt = [lat, lng]
+      var color = data.drone_colors[idx];
+      var starIcon = L.divIcon({
+        html: '<span style="color:' + color + '; font-size:20px;">★</span>',
+        iconSize: [20, 20],
+        className: ''
+      });
+      L.marker(pt, { icon: starIcon }).addTo(map);
+    });
+
+
+    // 6) Drone Rotaları: her drone kendi renginde polyline
+
+    data.drone_segments.forEach(function(segments, idx) {
+      // segments: [ [ [lng,lat], [lng,lat] ], [ [lng,lat], [lng,lat] ], … ]
+      var color = data.drone_colors[idx];
+      segments.forEach(function(seg) {
+        // seg = [ [lng,lat], [lng,lat] ]
+        var a = [ seg[0][1], seg[0][0] ];  // [lat, lng]
+        var b = [ seg[1][1], seg[1][0] ];  // [lat, lng]
+        L.polyline([ a, b ], {
+          color: color,
+          weight: 3,
+          opacity: 0.8
+        }).addTo(map);
+      });
+    });
+
+    // 7) Legend (Açıklama Kutusu) – haritanın sol alt köşesine
+
+    var legend = L.control({ position: 'bottomleft' });
+    legend.onAdd = function(map) {
+      var div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += '<div class="legend-title">Drone Rota Renkleri</div>';
+      data.drone_colors.forEach(function(col, idx) {
+        var dnum = idx + 1;
+        div.innerHTML += 
+          '<div class="legend-item">' +
+            '<div class="legend-marker" style="background:' + col + ';"></div>' +
+            '<div>Drone ' + dnum + '</div>' +
+          '</div>';
+      });
+      div.innerHTML += 
+        '<hr style="margin:6px 0;">' +
+        '<div class="legend-item">' +
+          '<div class="legend-marker" style="background:#000000; border-radius:50%;"></div>' +
+          '<div>Delivery Noktası</div>' +
+        '</div>' +
+        '<div class="legend-item">' +
+          '<div class="legend-marker" style="background:transparent; color:#FF69B4; font-size:18px;">&#9632;</div>' +
+          '<div>No-Fly Bölge</div>' +
+        '</div>' +
+        '<div class="legend-item">' +
+          '<div class="legend-marker" style="background:transparent; color:#000; font-size:16px;">★</div>' +
+          '<div>Drone Başlangıç Noktası</div>' +
+        '</div>';
+      return div;
+    };
+    legend.addTo(map);
+
+
+    // 8) Harita başlangıcında fitBounds uygulamak için “allCoords” dizisini derle
+
+    function clampLatLng(lat, lng) {
+      // Geçerli enlem aralığı: -85 ≤ lat ≤ 85
+      var cLat = Math.max(Math.min(lat, 85), -85);
+      return [cLat, lng];
+    }
+
+    var allCoords = [];
+
+    // 8.a) Teslimat noktaları
+    data.delivery_points.forEach(function(pt) {
+      allCoords.push(clampLatLng(pt[0], pt[1]));
+    });
+
+    // 8.b) Drone başlangıç noktaları
+    data.start_points.forEach(function(pt) {
+      allCoords.push(clampLatLng(pt[0], pt[1]));
+    });
+
+    // 8.c) Drone rotaları (her segmentin uç noktaları)
+    data.drone_segments.forEach(function(segments) {
+      segments.forEach(function(seg) {
+        var lat1 = seg[0][1], lng1 = seg[0][0];
+        var lat2 = seg[1][1], lng2 = seg[1][0];
+        allCoords.push(clampLatLng(lat1, lng1));
+        allCoords.push(clampLatLng(lat2, lng2));
+      });
+    });
+
+    // 8.d) No-Fly poligonlarının köşe noktaları
+    data.no_fly_polygons.forEach(function(polyCoords) {
+      polyCoords.forEach(function(pt) {
+        allCoords.push(clampLatLng(pt[0], pt[1]));
+      });
+    });
+
+    // 8.e) Eğer allCoords boş değilse, haritayı bounds içine sığdır
+    if (allCoords.length > 0) {
+      var bounds = L.latLngBounds(allCoords);
+      map.fitBounds(bounds, { padding: [20, 20] });
+    }
+    // ─────────────────────────────────────────────────────────────────────────────
+
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
