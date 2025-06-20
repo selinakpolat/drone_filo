@@ -50,16 +50,6 @@ Görselleştirme `generate_leaflet_html()` fonksiyonuyla `map_template.html` iç
 
 ---
 
-## 📊 Sonuçlar (Karşılaştırma Tablosu)
-
-| Senaryo        | Algoritma | Tamamlanan   | Enerji Tüketimi | İhlal Sayısı | Süre      |
-|----------------|-----------|--------------|------------------|--------------|-----------|
-| Sabit Veri     | GA        | 12/20 (%60)  | 3093.5           | 36           | 0.72 sn   |
-| Sabit Veri     | A*        | 29/100 (%29) | 4259.8           | 74           | 0.92 sn   |
-| Rastgele Veri  | GA        | 11/50 (%22)  | 24109.8          | 296          | 11.9 sn   |
-| Rastgele Veri  | A*        | 10/500 (%2)  | 15222.0          | 511          | 37.8 sn   |
-
----
 
 ## 📁 Proje Raporu
  [Proje Raporunu Görüntüle](./grup17.pdf)
